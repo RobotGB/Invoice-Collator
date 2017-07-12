@@ -1,0 +1,12 @@
+{
+    "minimum-stability": "dev",
+        "prefer-stable": true,
+    "require": {
+        "phpoffice/phpexcel": "^1.8"
+    },
+    "autoload": {
+        "psr-4": {
+            "Brainlabs\\Invoicing\\": "src/Brainlabs/Invoicing"
+        }
+    }
+}
