@@ -11,6 +11,7 @@ Cycles through a directory of Excel invoice files, collating the client sheets i
     5. Click Edit
     6. Click New and add "C:\xampp\php" as a new row and save
     7. Click OK, OK, OK
+4. Download and install composer
 3. Download this repository (green "clone or download button" near the top of the page)
 4. Unzip it to wherever you like
 5. Run the file bin\install.bat
