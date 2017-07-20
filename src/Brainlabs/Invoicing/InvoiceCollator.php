@@ -15,17 +15,14 @@ class InvoiceCollator
 
     private $headers;
 
+    private $ignore;
+
     const SUMMARY = "Summary";
 
     const COLLATED = "Collated.xlsx";
 
     const COMMERCIALS = "Commercials";
 
-    const IGNORE = [
-        self::SUMMARY,
-        self::SUMMARY . "_cache",
-        self::COMMERCIALS
-    ];
 
 
     public function __construct($dir) 
@@ -37,6 +34,11 @@ class InvoiceCollator
         }
 
         $this->dir = $dir;
+        $this->ignore = [
+            self::SUMMARY,
+            self::SUMMARY . "_cache",
+            self::COMMERCIALS
+        ];
     }
 
     public function run()
@@ -65,7 +67,7 @@ class InvoiceCollator
         $sheets = $ss->getAllSheets();
         $data = [];
         foreach ($sheets as $sheet) {
-            if (!in_array($sheet->getTitle(), self::IGNORE)) {
+            if (!in_array($sheet->getTitle(), $this->ignore)) {
                 $data[] = $this->getDataFromSheet($sheet);
             }
         }
