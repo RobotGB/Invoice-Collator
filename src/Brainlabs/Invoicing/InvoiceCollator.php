@@ -17,9 +17,16 @@ class InvoiceCollator
 
     const SUMMARY = "Summary";
 
-    const IGNORE = [self::SUMMARY, self::SUMMARY . "_cache", "Commercials"];
-
     const COLLATED = "Collated.xlsx";
+
+    const COMMERCIALS = "Commercials";
+
+    const IGNORE = [
+        self::SUMMARY,
+        self::SUMMARY . "_cache",
+        self::COMMERCIALS
+    ];
+
 
     public function __construct($dir) 
     {
@@ -38,6 +45,7 @@ class InvoiceCollator
         $dir = $this->dir;
         $ignoreFiles = ['.', '..', self::COLLATED];
         foreach (array_diff(scandir($dir), $ignoreFiles) as $file) {
+            // @todo Check filetype
             $data[] = $this->collateFile($dir . $file);
         }
         $this->outputCollated($data);
@@ -62,9 +70,29 @@ class InvoiceCollator
             }
         }
 
-        $collated = $this->updateSummary($ss, $data);
+        if (!count($data)) {
+            $summarySheet = $ss->getSheetByName(self::SUMMARY);
+            if (is_null($summarySheet)) {
+                throw new Exception(
+                    "No Client sheets or Summary sheet in $filepath"
+                );
+            }
+            $data[] = $this->getDataFromSheet($summarySheet);
+        }
+
+        $summaryData = $this->createCollatedSheet($ss, $data, self::SUMMARY);
+
+        $commsSheet = $ss->getSheetByName(self::COMMERCIALS);
+        if (is_null($commsSheet)) {
+            throw new Exception("No Commercials sheet in file : $filepath");
+        }
+        $commercialData = $this->getDataFromSheet($commsSheet);
+
         $this->flush($ss, $filepath);
-        return $collated;
+        return [
+            self::SUMMARY => $summaryData,
+            self::COMMERCIALS => $commercialData
+        ];
     }
 
     private function getDataFromSheet($sheet) 
@@ -84,7 +112,8 @@ class InvoiceCollator
             $headers[] = $this->getValueAtCell($sheet, $i, 1);
         }
 
-        if (is_null($this->headers)) {
+        $saved = $this->headers;
+        if (is_null($saved) || count($headers) > count($saved)) {
             $this->headers = $headers;
         }
 
@@ -92,16 +121,17 @@ class InvoiceCollator
             $row = [];
             $empty = true;
             for ($h = 0; $h < $highestCol; $h++) {
-                $value = $this->getValueAtCell($sheet, $h, $i);
-                $row[$headers[$h]] = $value;
-                if ($empty && $value !== '') $empty = false;
+                $value = trim($this->getValueAtCell($sheet, $h, $i));
+                $key =$headers[$h]; 
+                if ($key !== '') $row[$key] = $value;
+                if ($empty && $value != '') $empty = false;
             }
             if (!$empty) $data[] = $row;
         }
         return $data;
     }
 
-    private function updateSummary($ss, $data) 
+    private function createCollatedSheet($ss, $data, $sheetName) 
     {
         $summaryName = self::SUMMARY;
         $summary = $ss->getSheetByName($summaryName);
@@ -140,11 +170,41 @@ class InvoiceCollator
         $filepath = $this->dir . self::COLLATED;
         printf("Creating Collated File : %s\n", $filepath);
         $ss = new PHPExcel();
-        $sheet = $ss->getActiveSheet();
-        $sheet->setTitle(self::SUMMARY);
-        $output = call_user_func_array('array_merge', $data);
-        $this->writeDataToSheet($sheet, $output, 1, 1);
+
+        $summarySheet = $ss->getActiveSheet();
+        $summarySheet->setTitle(self::SUMMARY);
+
+        $commsSheet = $ss->createSheet();
+        $commsSheet->setTitle(self::COMMERCIALS);
+
+        $sheets = [
+            self::SUMMARY=>$summarySheet,
+            self::COMMERCIALS=>$commsSheet
+        ];
+
+        $output = [self::SUMMARY=>[], self::COMMERCIALS=>[]];
+        foreach ($data as $sheetData) {
+            foreach ($sheetData as $key => $data) {
+                $output[$key] = array_merge($output[$key], $data);
+            }
+        }
+
+        foreach ($output as $sheetName => $data) {
+            $this->setHeadersFromData($data);
+            $this->writeDataToSheet($sheets[$sheetName], $data, 1, 0);
+        }
+
         $this->flush($ss, $filepath);
+    }
+    
+    private function setHeadersFromData($data) {
+        $headerStore = [];
+        foreach ($data as $row) {
+            foreach ($row as $header => $value) {
+                $headerStore[$header] = true;
+            }
+        }
+        $this->headers = array_keys($headerStore);
     }
 
     private function writeDataToSheet($sheet, $data, $startRow, $startCol) 
@@ -167,7 +227,8 @@ class InvoiceCollator
             foreach ($data as $row) {
                 foreach ($headers as $header) {
                     $column = PHPExcel_Cell::stringFromColumnIndex($c++);
-                    $sheet->setCellValue($column . $r, $row[$header]);
+                    $val = (isset($row[$header]) ? $row[$header] : '');
+                    $sheet->setCellValue($column . $r, $val);
                 }
                 $c = $startCol;
                 $r++;
