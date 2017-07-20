@@ -8,12 +8,12 @@ You will need to manually install PHP. Instructions can be found [here](https://
 Downlod this tool by clicking the green 'Clone or Downlod' button at the top of this page
 To run, create a folder and put all the invoice excel files you would like the tool to process within it. 
 
-####Windows : 
+###Windows : 
 * Run the file bin/run.bat 
 * You will be asked to enter the directory you want to run on
 * This can be acquired by opening that folder and clicking in the address bar at the top and copy and pasting
 
-####Mac : 
+###Mac : 
 * Right click the file bin/run.sh > open with > other > search for terminal > always > ok
 * You will be asked to enter the directory you want to run on
 * You can do this by dragging and dropping the desired folder into the terminal window
