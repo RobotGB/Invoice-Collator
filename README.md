@@ -5,10 +5,18 @@ Cycles through a directory of Excel invoice files, collating the client sheets i
 You will need to manually install PHP. Instructions can be found [here](https://sites.google.com/a/brainlabsdigital.com/wiki/tech/tips/programming/php/installation)
 
 ## Running
+Downlod this tool by clicking the green 'Clone or Downlod' button at the top of this page
 To run, create a folder and put all the invoice excel files you would like the tool to process within it. 
-Run the file bin\run.bat (windows) or bin/run.sh (mac), you will be prompted to enter the path of the above folder. 
-This can be acquired by opening that folder and clicking in the address bar at the top and copy and pasting
-The tool will collate the summary pages for each individual excel and create a summary excel containing all of the individual summary sheets together
+
+Windows : 
+    Run the file bin/run.bat 
+    You will be asked to enter the directory you want to run on
+    This can be acquired by opening that folder and clicking in the address bar at the top and copy and pasting
+Mac : 
+    Right click the file bin/run.sh > open with > other > search for terminal > always > ok
+    You will be asked to enter the directory you want to run on
+    You can do this by dragging and dropping the desired folder into the terminal window
+
 
 
 ## Support
