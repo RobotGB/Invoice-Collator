@@ -6,6 +6,7 @@ You will need to manually install PHP. Instructions can be found [here](https://
 
 ## Running
 Downlod this tool by clicking the green 'Clone or Downlod' button at the top of this page
+Please create your Invoice workbooks by copying the template workbook provided.
 To run, create a folder and put all the invoice excel files you would like the tool to process within it. 
 
 ##### Windows : 
